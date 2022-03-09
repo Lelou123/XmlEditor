@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO8859-1"?>
+<CATALOGO>
+    <CD>
+        <TITULO>Minas</TITULO>
+        <ARTISTA>Maicon Jackson</ARTISTA>
+        <PAIS>ESTADOS UNIDOS</PAIS>
+        <ANO>1999</ANO>
+    </CD>
+    <CD>
+        <TITULO>Roots</TITULO>
+        <ARTISTA>Sepulct</ARTISTA>
+        <PAIS>ESTADOS UNIDOS</PAIS>
+        <ANO>1987</ANO>
+    </CD>
+</CATALOGO>

@@ -1,0 +1,159 @@
+﻿@model XmlEditor.Models.XmlModel
+@using XmlEditor.Models;
+
+
+@{
+	ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center mt-5">
+	<h1>XML Editor</h1>
+
+</div>
+
+<div class="container text-center ">
+
+	<div class="container">
+		@ViewBag.Errors
+		<div class="row d-flex justify-content-between text-center ">
+			<!-- Criar forms aqui dentro-->
+
+
+			<div class="col-sm-5 mt-5 ">
+
+				@if (ViewBag.Nodes != null)
+				{
+
+					<div class="container d-flex justify-content-around">
+						<div class="col-sm-6 mt-3">
+							@foreach (var i in ViewBag.Nodes)
+							{
+								<div class=" col-2">
+									<label>@i</label>
+								</div>
+								<br>
+							}
+						</div>
+
+						<div class="col-sm-6">
+							@foreach (var j in ViewBag.NodesContent)
+							{
+								<div class=" col-2 mt-3">
+									<input class="FormNodes" value="@j" />
+								</div>
+							}
+						</div>
+					</div>
+
+					<button type="submit" onclick="FormsInfo()" value="Upload" class="btn btn-primary mt-3">Enviar</button>
+				}
+			</div>
+
+
+
+			<div class="col-sm-5 mt-4">
+				<form method="post" asp-action="XmlDataUpload" asp-controller="Home" enctype="multipart/form-data">
+
+					<div class="form-group">
+						<label asp-for="InputXml" for="exampleTextarea" class="form-label ">Insira os dados do XML</label>
+						<textarea asp-for="InputXml" class="form-control" value="@ViewBag.FIleContent" type="text" id="exampleTextarea" rows="3" style="height: 300px;"></textarea>
+
+					</div>
+					<button type="submit" value="Upload" class="btn btn-success mt-3">Save</button>
+				</form>
+				<form method="post" asp-action="XmlFileUpload" asp-controller="Home" enctype="multipart/form-data">
+					<div class="form-group mt-4">
+						<input type="file" accept=".xml" name="files" multiple />
+						<button type="submit" value="Upload" class="btn btn-success mt-1">Salvar Arquivo</button>
+					</div>
+				</form>
+
+			</div>
+
+		</div>
+
+	</div>
+
+	<div class="container">
+		<div class="row  justify-content-end">
+			<div class="col-sm-5">
+				<form>
+					<div class="container ">
+
+						<div class="row">
+							<div class="form-group">
+								<label for="exampleTextarea" class="form-label mt-4">XML Formatado</label>
+								<textarea class="form-control" id="exampleTextarea" disabled type="text" rows="3" style="height: 300px; ">@ViewBag.FileContent</textarea>
+							</div>
+						</div>
+
+						<div class="row justify-content-around">
+							<form method="post" enctype="multipart/form-data" asp-action="Index" asp-controller="Home">
+								<div class=" col-sm-4 mt-2 form-check form-switch">
+									@Html.CheckBox("MinifyBool", false) <!-- aqui -->
+
+									<label class="form-check-label" for="flexSwitchCheckChecked">Visualizar xml minificado</label>
+									<button type="submit" value="Upload" class="btn btn-success mt-1">Save</button>
+								</div>
+							</form>
+
+							<div class="col-2">
+								<form method="get" enctype="multipart/form-data" asp-action="DownloadDocument">
+									<div class="col-sm-4 mt-2 ">
+
+										@Html.CheckBox("MinifyBool", false) <!-- aqui -->
+										<label class="form-check-label" for="flexSwitchCheckChecked">Download minificado</label>
+										<button type="submit" class="btn btn-primary mt-1"> Download  </button>
+									</div>
+								</form>
+
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+
+
+	function FormsInfo(){
+		var listForms = document.getElementsByClassName('FormNodes');
+		var itens = "";
+		for(var i = 0; i < listForms.length; i++)
+		{
+			itens += listForms[i].value + '+';
+
+		}
+		window.alert(itens);
+
+
+
+		var json = {
+			XmlFiles: itens
+		}
+
+
+			$.ajax(
+			{
+				url: '/Home/testejson',
+				type: 'POST',
+				contentType: 'application/json; charset=utf-8',
+				dataType: 'json',
+				data: JSON.stringify(json),
+				success: function (data) {
+					window.alert('sucess Post' + data);
+				},
+				failure: function (data) {
+					window.alert('error Post' + data);
+				}
+			}
+			);
+
+	}
+
+
+
+</script>
+
