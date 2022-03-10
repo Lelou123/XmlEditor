@@ -160,22 +160,20 @@ namespace XmlEditor.Controllers
 
             string pathFile = Path.Combine(filePath, list2[0]);
 
-            XmlDocument xmlDoc = new XmlDocument();
+            //XmlDocument xmlDoc = new XmlDocument();
             XmlDocument doc = new XmlDocument();
             if (System.IO.File.Exists(pathFile))
             {
                 //xmlDoc.Load(pathFile);
-                doc.Load(pathFile);
-                XmlElement elm = xmlDoc.DocumentElement;
+                string content = System.IO.File.ReadAllText(pathFile);
+
+                doc.LoadXml(content);
+                XmlElement elm = doc.DocumentElement;
                 List<string> s = new List<string>();
 
-                xmlDoc.Load(pathFile);
+                //xmlDoc.Load(pathFile);
 
                 //xmlDoc.SelectSingleNode("CATALOGO/CD/TITULO").InnerText = "Testando";                
-
-
-
-
 
 
                 List<string> v = new List<string>();
@@ -190,13 +188,9 @@ namespace XmlEditor.Controllers
                     }
 
                     else
-                    {                                              
-                        s.Add(root.ParentNode.LocalName);
-                        
-                        for (int i = 0; i < s.Count; i++)
-                        {
-                            doc.SelectSingleNode(s[i]).InnerText = list[i];
-                        }
+                    {
+                        root.InnerText = list[0];
+                        list.Remove(list[0]);
 
                         while (true)
                         {
@@ -210,9 +204,7 @@ namespace XmlEditor.Controllers
 
                                     break;
                                 }
-
                             }
-
                             else
                             {
                                 flag = false;
@@ -220,40 +212,13 @@ namespace XmlEditor.Controllers
                             }
                         }
                     }
-
                 }
+                string a = doc.InnerXml;
+                System.IO.File.WriteAllText(pathFile, a);
 
 
 
-                foreach (XmlNode node in elm.ChildNodes)
-                {
-                    if (node.HasChildNodes)
-                    {
-                        foreach (XmlNode childNode in node.ChildNodes)
-                        {
-                            s.Add(childNode.LocalName);
-                        }
-                    }
-                }
-
-
-                for (int i = 0; i < s.Count; i++)
-                {
-                    foreach (XmlNode node in elm.ChildNodes)
-                    {
-                        if (node.HasChildNodes)
-                        {
-                            foreach (XmlNode childNode in node.ChildNodes)
-                            {
-                                if (list[i] != "")
-                                {
-                                    xmlDoc.SelectSingleNode("CATALOGO/CD/" + s[i]).InnerText = list[i];
-                                }
-                            }
-                        }
-                    }
-                }
-                doc.Save(pathFile);
+                
 
             }
 
