@@ -51,25 +51,20 @@
 
 
 
-			<div class="col-sm-5 mt-4">
-				<form method="post" asp-action="XmlDataUpload" asp-controller="Home" enctype="multipart/form-data">
-
+			<div class="col-sm-5 mt-4">			
 					<div class="form-group">
-						<label asp-for="InputXml" for="exampleTextarea" class="form-label ">Insira os dados do XML</label>
-						<textarea asp-for="InputXml" class="form-control" value="@ViewBag.FIleContent" type="text" id="exampleTextarea" rows="3" style="height: 300px;"></textarea>
-
+						<label for="exampleTextarea" class=" form-label ">Insira os dados do XML</label>
+						<textarea class=" InputXml1 form-control" type="text" id="exampleTextarea" rows="3" style="height: 300px;">@ViewBag.FileContent</textarea>												
 					</div>
-					<button type="submit" value="Upload" class="btn btn-success mt-3">Save</button>
-				</form>
+					<button  type="submit" onclick="Inputbtn()" value="Upload" class="btn btn-success mt-3">Save</button>
+				
 				<form method="post" asp-action="XmlFileUpload" asp-controller="Home" enctype="multipart/form-data">
 					<div class="form-group mt-4">
 						<input type="file" accept=".xml" name="files" multiple />
-						<button type="submit" value="Upload" class="btn btn-success mt-1">Salvar Arquivo</button>
+						<button type="submit"  value="Upload" class="btn btn-success mt-1">Salvar Arquivo</button>
 					</div>
 				</form>
-
 			</div>
-
 		</div>
 
 	</div>
@@ -126,18 +121,16 @@
 			itens += listForms[i].value + '+';
 
 		}
-		window.alert(itens);
-
-
+		
 
 		var json = {
 			XmlFiles: itens
 		}
 
-
+			
 			$.ajax(
 			{
-				url: '/Home/testejson',
+				url: '/Home/InsertInput',
 				type: 'POST',
 				contentType: 'application/json; charset=utf-8',
 				dataType: 'json',
@@ -152,6 +145,38 @@
 			);
 
 	}
+
+	function Inputbtn(){
+		var listForms = document.getElementsByClassName('InputXml1');
+		var itens = "";
+		for(var i = 0; i < listForms.length; i++)
+		{
+			itens += listForms[i].value;
+
+		}
+		var json = {
+			InputXml: itens
+		}
+		$.ajax(
+			{
+				url: '/Home/XmlDataUpload',
+				type: 'POST',
+				contentType: 'application/json; charset=utf-8',
+				dataType: 'json',
+				data: JSON.stringify(json),
+				success: function (data) {
+					window.alert('Dados entrados com sucesso' + data);
+				},
+				failure: function (data) {
+					window.alert('Dados entrados falharam ao enviar	' + data);
+				}
+			}
+			);
+	}
+
+		
+
+	
 
 
 

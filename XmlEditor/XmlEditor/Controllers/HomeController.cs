@@ -30,10 +30,7 @@ namespace XmlEditor.Controllers
 
         public IActionResult Index(bool MinifyBool)
         {
-            XmlModel x = new XmlModel();
 
-
-            //Get xml Content
             string filePath = Path.Combine(_environment.WebRootPath, "Temp");
 
             string[] allfiles = Directory.GetFiles((filePath), "*.xml", SearchOption.TopDirectoryOnly);
@@ -47,29 +44,23 @@ namespace XmlEditor.Controllers
 
             if (list.Count > 0)
             {
+               
+
+
                 string pathFile = Path.Combine(filePath, list[0]);
                 string fileContent;
-
-
+                XDocument doc1 = XDocument.Load(pathFile);
                 if (MinifyBool == true)
                 {
-                    XDocument doc = XDocument.Load(pathFile);
 
-                    fileContent = doc.ToString(SaveOptions.DisableFormatting);
+                    fileContent = doc1.ToString(SaveOptions.DisableFormatting);
                     ViewBag.FileContent = fileContent;
-
                 }
                 else
                 {
-                    XDocument doc = XDocument.Load(pathFile);
-
-                    fileContent = doc.ToString();
+                    fileContent = doc1.ToString();
                     ViewBag.FileContent = fileContent;
-
                 }
-
-
-                //Get child nodes
 
 
                 if (System.IO.File.Exists(pathFile))
@@ -77,9 +68,10 @@ namespace XmlEditor.Controllers
                     XmlDocument doc = new XmlDocument();
                     doc.Load(pathFile);
                     XmlElement elm = doc.DocumentElement;
-                    List<string> s = new List<string>();
 
-                    List<string> v = new List<string>();
+                    List<string> parentName = new List<string>();
+                    List<string> nodeInnertext = new List<string>();
+
                     XmlNode root = elm.FirstChild;
                     bool flag = true;
 
@@ -89,11 +81,10 @@ namespace XmlEditor.Controllers
                         {
                             root = root.FirstChild;
                         }
-
                         else
                         {
-                            s.Add(root.ParentNode.LocalName);
-                            v.Add(root.ParentNode.InnerText);
+                            parentName.Add(root.ParentNode.LocalName);
+                            nodeInnertext.Add(root.ParentNode.InnerText);
                             while (true)
                             {
                                 if (root.ParentNode != null)
@@ -101,14 +92,10 @@ namespace XmlEditor.Controllers
                                     root = root.ParentNode;
                                     if (root.NextSibling != null)
                                     {
-
                                         root = root.NextSibling;
-
                                         break;
                                     }
-
                                 }
-
                                 else
                                 {
                                     flag = false;
@@ -116,29 +103,24 @@ namespace XmlEditor.Controllers
                                 }
                             }
                         }
-
                     }
-
-                    ViewBag.NodesContent = v;
-
-                    ViewBag.Nodes = s;
+                    ViewBag.NodesContent = nodeInnertext;
+                    ViewBag.Nodes = parentName;
                 }
             }
-
-
             return View();
         }
 
 
 
 
-        [HttpPost]
-        public async Task<IActionResult> testejson([FromBody] XmlModel x)
-        {
 
+
+        [HttpPost]
+        public async Task<IActionResult> InsertInput([FromBody] XmlModel x)
+        {
             string[] vet = x.XmlFiles.Split("+");
             List<string> list = new List<string>();
-
 
             foreach (string v in vet)
             {
@@ -146,7 +128,6 @@ namespace XmlEditor.Controllers
             }
 
             string filePath = Path.Combine(_environment.WebRootPath, "Temp");
-
             string[] allfiles = Directory.GetFiles((filePath), "*.xml", SearchOption.TopDirectoryOnly);
 
             List<string> list2 = new List<string>();
@@ -155,29 +136,18 @@ namespace XmlEditor.Controllers
             {
                 list2.Add(Path.GetFileName(file));
             }
-
-
-
             string pathFile = Path.Combine(filePath, list2[0]);
 
-            //XmlDocument xmlDoc = new XmlDocument();
             XmlDocument doc = new XmlDocument();
             if (System.IO.File.Exists(pathFile))
             {
-                //xmlDoc.Load(pathFile);
-                string content = System.IO.File.ReadAllText(pathFile);
 
+                string content = await System.IO.File.ReadAllTextAsync(pathFile);
                 doc.LoadXml(content);
+
                 XmlElement elm = doc.DocumentElement;
-                List<string> s = new List<string>();
-
-                //xmlDoc.Load(pathFile);
-
-                //xmlDoc.SelectSingleNode("CATALOGO/CD/TITULO").InnerText = "Testando";                
-
-
-                List<string> v = new List<string>();
                 XmlNode root = elm.FirstChild;
+
                 bool flag = true;
 
                 while (flag)
@@ -186,12 +156,10 @@ namespace XmlEditor.Controllers
                     {
                         root = root.FirstChild;
                     }
-
                     else
                     {
                         root.InnerText = list[0];
                         list.Remove(list[0]);
-
                         while (true)
                         {
                             if (root.ParentNode != null)
@@ -199,9 +167,7 @@ namespace XmlEditor.Controllers
                                 root = root.ParentNode;
                                 if (root.NextSibling != null)
                                 {
-
                                     root = root.NextSibling;
-
                                     break;
                                 }
                             }
@@ -214,18 +180,11 @@ namespace XmlEditor.Controllers
                     }
                 }
                 string a = doc.InnerXml;
-                System.IO.File.WriteAllText(pathFile, a);
-
-
-
-                
+                await System.IO.File.WriteAllTextAsync(pathFile, a);
 
             }
-
-
             return Json(new { result = "OK OK " });
         }
-
 
 
 
@@ -237,23 +196,18 @@ namespace XmlEditor.Controllers
 
             string[] allfiles = Directory.GetFiles((filePath), "*.xml", SearchOption.TopDirectoryOnly);
 
-            List<string> list = new List<string>();
+            List<string> arquivoList = new List<string>();
 
             foreach (string file in allfiles)
             {
-                list.Add(Path.GetFileName(file));
+                arquivoList.Add(Path.GetFileName(file));
             }
 
-            string pathFile = Path.Combine(filePath, list[0]);
-
-            string fileName = list[0];
-
-
-            string arquivo = Path.Combine(filePath, fileName);
+            string arquivo = Path.Combine(filePath, arquivoList[0]);
 
             if (MinifyBool == false)
             {
-                XDocument doc = XDocument.Load(pathFile);
+                XDocument doc = XDocument.Load(arquivo);
 
                 string fileContent = doc.ToString(SaveOptions.None);
 
@@ -261,13 +215,12 @@ namespace XmlEditor.Controllers
                 {
                     sw.WriteLine(fileContent);
                 }
-
-                byte[] fileBytes1 = System.IO.File.ReadAllBytes(pathFile);
-                return File(fileBytes1, "application/force-download", fileName);
+                byte[] fileBytes1 = System.IO.File.ReadAllBytes(arquivo);
+                return File(fileBytes1, "application/force-download", arquivoList[0]);
             }
             else
             {
-                XDocument doc = XDocument.Load(pathFile);
+                XDocument doc = XDocument.Load(arquivo);
 
                 string fileContent = doc.ToString(SaveOptions.DisableFormatting);
 
@@ -276,17 +229,14 @@ namespace XmlEditor.Controllers
                     sw.WriteLine(fileContent);
                 }
             }
-
             byte[] fileBytes = System.IO.File.ReadAllBytes(arquivo);
-
-            return File(fileBytes, "application/force-download", fileName);
-
+            return File(fileBytes, "application/force-download", arquivoList[0]);
         }
 
 
 
 
-        public async Task<IActionResult> XmlFileUpload(ICollection<IFormFile> files, XmlModel x)
+        public async Task<IActionResult> XmlFileUpload(ICollection<IFormFile> files)
         {
             string filePath = Path.Combine(_environment.WebRootPath, "Temp");
 
@@ -300,31 +250,49 @@ namespace XmlEditor.Controllers
                     }
                 }
             }
-            return RedirectToAction("Index");
-        }
-
-
-
-
-        [HttpPost]
-        //Ação de upar as informações na text area
-        public async Task<IActionResult> XmlDataUpload(ICollection<IFormFile> files, XmlModel x)
-        {
-            string filePath = Path.Combine(_environment.WebRootPath, "Temp");
-
-            if (files != null && x.InputXml != "")
-            {
-                string stringPath = Path.Combine(filePath, "texto.xml");
-                using (StreamWriter sw = System.IO.File.CreateText(stringPath))
-                {
-                    sw.WriteLine(x.InputXml);
-                }
-            }
-
             return RedirectToAction(nameof(Index));
         }
 
 
+
+        [HttpPost]
+
+        public async Task<IActionResult> XmlDataUpload([FromBody] XmlModel x, ICollection<IFormFile> files)
+        {
+
+            string filePath = Path.Combine(_environment.WebRootPath, "Temp");
+
+            string[] allfiles = Directory.GetFiles((filePath), "*.xml", SearchOption.TopDirectoryOnly);
+
+            List<string> list = new List<string>();
+
+            foreach (string file in allfiles)
+            {
+                list.Add(Path.GetFileName(file));
+            }
+
+            if (files != null && x.InputXml != "")
+            {
+                string stringPath;
+                if (list.Count > 0)
+                {
+                    stringPath = Path.Combine(filePath, list[0]);
+                    System.IO.File.Delete(list[0]);
+                }
+                else
+                {
+                    stringPath = Path.Combine(filePath, "texto.xml");
+                }
+
+                using (StreamWriter sw = System.IO.File.CreateText(stringPath))
+                {
+                    await sw.WriteLineAsync(x.InputXml);
+                }
+                return Json(new { result = "OK OK " });
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
 
 
 
