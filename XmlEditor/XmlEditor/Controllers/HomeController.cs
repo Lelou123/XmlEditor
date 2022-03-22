@@ -8,8 +8,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Web;
 using System.Xml.Linq;
 using XmlEditor.Models;
+using XmlEditor.Models.Services.Exceptions;
 
 namespace XmlEditor.Controllers
 {
@@ -28,85 +30,94 @@ namespace XmlEditor.Controllers
 
 
 
-        public IActionResult Index(bool MinifyBool)
+        public async Task<IActionResult> Index(bool MinifyBool)
         {
-
+            XmlModel x = new XmlModel();
             string filePath = Path.Combine(_environment.WebRootPath, "Temp");
-
-            string[] allfiles = Directory.GetFiles((filePath), "*.xml", SearchOption.TopDirectoryOnly);
-
-            List<string> list = new List<string>();
-
-            foreach (string file in allfiles)
-            {
-                list.Add(Path.GetFileName(file));
-            }
+                
+            var list = x.ListaArquivos(_environment);
 
             if (list.Count > 0)
             {
-               
-
-
-                string pathFile = Path.Combine(filePath, list[0]);
-                string fileContent;
-                XDocument doc1 = XDocument.Load(pathFile);
-                if (MinifyBool == true)
+                try
                 {
-
-                    fileContent = doc1.ToString(SaveOptions.DisableFormatting);
-                    ViewBag.FileContent = fileContent;
-                }
-                else
-                {
-                    fileContent = doc1.ToString();
-                    ViewBag.FileContent = fileContent;
-                }
-
-
-                if (System.IO.File.Exists(pathFile))
-                {
-                    XmlDocument doc = new XmlDocument();
-                    doc.Load(pathFile);
-                    XmlElement elm = doc.DocumentElement;
-
-                    List<string> parentName = new List<string>();
-                    List<string> nodeInnertext = new List<string>();
-
-                    XmlNode root = elm.FirstChild;
-                    bool flag = true;
-
-                    while (flag)
+                    string pathFile = Path.Combine(filePath, list[0]);
+                    string fileContent;
+                    XElement f = XElement.Load(pathFile);
+                    XDocument doc1 = XDocument.Load(pathFile);
+                    if (MinifyBool == true)
                     {
-                        if (root.HasChildNodes)
+
+                        fileContent = doc1.ToString(SaveOptions.DisableFormatting);
+                        ViewBag.FileContent = fileContent; // Visualização text area                                                
+
+
+                        string content = await System.IO.File.ReadAllTextAsync(pathFile);
+
+                        ViewBag.FileContent2 = content; // Edição textarea
+                    }
+                    else
+                    {
+                        XmlDocument doc = new XmlDocument();
+
+                        string content = await System.IO.File.ReadAllTextAsync(pathFile);
+
+                        ViewBag.FileContent2 = content; // Edição textarea
+
+                        fileContent = doc1.ToString();
+                        ViewBag.FileContent = fileContent; // visualização textarea
+                    }
+
+                    if (System.IO.File.Exists(pathFile))
+                    {
+                        XmlDocument doc = new XmlDocument();
+                        doc.Load(pathFile);
+                        XmlElement elm = doc.DocumentElement;
+
+                        List<string> parentName = new List<string>();
+                        List<string> nodeInnertext = new List<string>();
+
+                        XmlNode root = elm.FirstChild;
+                        bool flag = true;
+
+                        while (flag)
                         {
-                            root = root.FirstChild;
-                        }
-                        else
-                        {
-                            parentName.Add(root.ParentNode.LocalName);
-                            nodeInnertext.Add(root.ParentNode.InnerText);
-                            while (true)
+                            if (root.HasChildNodes)
                             {
-                                if (root.ParentNode != null)
+                                root = root.FirstChild;
+                            }
+                            else
+                            {
+                                parentName.Add(root.ParentNode.LocalName);
+                                nodeInnertext.Add(root.ParentNode.InnerText);
+                                while (true)
                                 {
-                                    root = root.ParentNode;
-                                    if (root.NextSibling != null)
+                                    if (root.ParentNode != null)
                                     {
-                                        root = root.NextSibling;
+                                        root = root.ParentNode;
+                                        if (root.NextSibling != null)
+                                        {
+                                            root = root.NextSibling;
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        flag = false;
                                         break;
                                     }
                                 }
-                                else
-                                {
-                                    flag = false;
-                                    break;
-                                }
                             }
                         }
+                        ViewBag.NodesContent = nodeInnertext;
+                        ViewBag.Nodes = parentName;
                     }
-                    ViewBag.NodesContent = nodeInnertext;
-                    ViewBag.Nodes = parentName;
                 }
+                catch (XmlException e)
+                {
+                    ViewBag.Errors = e.Message;
+                }
+              
             }
             return View();
         }
@@ -120,23 +131,23 @@ namespace XmlEditor.Controllers
         public async Task<IActionResult> InsertInput([FromBody] XmlModel x)
         {
             string[] vet = x.XmlFiles.Split("+");
-            List<string> list = new List<string>();
+            List<string> listaInputs = new List<string>();
 
             foreach (string v in vet)
-            {
-                list.Add(v);
+            {                                
+                listaInputs.Add(v);
             }
-
+            for(int i = 0; i < listaInputs.Count; i++)
+            {
+                string pEncode = listaInputs[i];
+                string myEncodedString = HttpUtility.HtmlAttributeEncode(pEncode);
+                listaInputs[i] = pEncode;
+            }
             string filePath = Path.Combine(_environment.WebRootPath, "Temp");
-            string[] allfiles = Directory.GetFiles((filePath), "*.xml", SearchOption.TopDirectoryOnly);
-
-            List<string> list2 = new List<string>();
-
-            foreach (string file in allfiles)
-            {
-                list2.Add(Path.GetFileName(file));
-            }
-            string pathFile = Path.Combine(filePath, list2[0]);
+            
+            var listaArquivos = x.ListaArquivos(_environment);
+            
+            string pathFile = Path.Combine(filePath, listaArquivos[0]);
 
             XmlDocument doc = new XmlDocument();
             if (System.IO.File.Exists(pathFile))
@@ -158,8 +169,8 @@ namespace XmlEditor.Controllers
                     }
                     else
                     {
-                        root.InnerText = list[0];
-                        list.Remove(list[0]);
+                        root.InnerText = listaInputs[0];
+                        listaInputs.Remove(listaInputs[0]);
                         while (true)
                         {
                             if (root.ParentNode != null)
@@ -179,13 +190,23 @@ namespace XmlEditor.Controllers
                         }
                     }
                 }
-                string a = doc.InnerXml;
+                
+                string a = doc.OuterXml;
+                
                 await System.IO.File.WriteAllTextAsync(pathFile, a);
+
+                XDocument doc1 = XDocument.Load(pathFile);
+                
+                string fileContent = doc1.ToString(SaveOptions.None);
+                
+                using (StreamWriter sw = System.IO.File.CreateText(pathFile))
+                {
+                    sw.WriteLine(fileContent);
+                }
 
             }
             return Json(new { result = "OK OK " });
         }
-
 
 
 
@@ -256,20 +277,10 @@ namespace XmlEditor.Controllers
 
 
         [HttpPost]
-
         public async Task<IActionResult> XmlDataUpload([FromBody] XmlModel x, ICollection<IFormFile> files)
         {
-
             string filePath = Path.Combine(_environment.WebRootPath, "Temp");
-
-            string[] allfiles = Directory.GetFiles((filePath), "*.xml", SearchOption.TopDirectoryOnly);
-
-            List<string> list = new List<string>();
-
-            foreach (string file in allfiles)
-            {
-                list.Add(Path.GetFileName(file));
-            }
+            var list = x.ListaArquivos(_environment);
 
             if (files != null && x.InputXml != "")
             {
@@ -297,9 +308,16 @@ namespace XmlEditor.Controllers
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(string message)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var viewModel = new ErrorViewModel
+            {
+                Message = message,
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier 
+            };
+            return View(viewModel);
         }
+
+
     }
 }

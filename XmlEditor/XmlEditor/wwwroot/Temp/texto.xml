@@ -1,14 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <CATALOGO>
   <CD>
-    <TITULO>Sao paulo</TITULO>
+    <TITULO>Minas</TITULO>
     <ARTISTA>Maicon Jackson</ARTISTA>
-    <PAIS>Argentina</PAIS>
-    <ANO>2002</ANO>
+    <PAIS>teste2</PAIS>
+    <ANO>€</ANO>
   </CD>
   <CD>
-    <TITULO>Goc</TITULO>
-    <ARTISTA>gabriel</ARTISTA>
-    <PAIS>ESTADOS a</PAIS>
-    <ANO>2022</ANO>
+    <TITULO>É</TITULO>
+    <ARTISTA>&amp;</ARTISTA>
+    <PAIS>&lt;</PAIS>
+    <ANO>&gt;</ANO>
   </CD>
 </CATALOGO>
