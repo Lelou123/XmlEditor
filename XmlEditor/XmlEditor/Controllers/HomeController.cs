@@ -12,6 +12,7 @@ using System.Web;
 using System.Xml.Linq;
 using XmlEditor.Models;
 using XmlEditor.Models.Services.Exceptions;
+using System.Linq;
 
 namespace XmlEditor.Controllers
 {
@@ -50,7 +51,6 @@ namespace XmlEditor.Controllers
 
                         fileContent = doc1.ToString(SaveOptions.DisableFormatting);
                         ViewBag.FileContent = fileContent; // Visualização text area                                                
-
 
                         string content = await System.IO.File.ReadAllTextAsync(pathFile);
 
@@ -121,7 +121,6 @@ namespace XmlEditor.Controllers
             }
             return View();
         }
-
 
 
 
@@ -198,12 +197,16 @@ namespace XmlEditor.Controllers
                 XDocument doc1 = XDocument.Load(pathFile);
                 
                 string fileContent = doc1.ToString(SaveOptions.None);
-                
+                string header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
                 using (StreamWriter sw = System.IO.File.CreateText(pathFile))
                 {
+                    string line1 = System.IO.File.ReadLines(fileContent).First();
+                    if(line1 != header)
+                    {
+                        sw.WriteLine(header);
+                    }                    
                     sw.WriteLine(fileContent);
                 }
-
             }
             return Json(new { result = "OK OK " });
         }
@@ -298,7 +301,7 @@ namespace XmlEditor.Controllers
                 using (StreamWriter sw = System.IO.File.CreateText(stringPath))
                 {
                     await sw.WriteLineAsync(x.InputXml);
-                }
+                }                
                 return Json(new { result = "OK OK " });
             }
 
