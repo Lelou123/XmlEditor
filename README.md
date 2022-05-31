@@ -1,26 +1,24 @@
 # XmlEditor ❌:
 
+Welcome to my repository made of a challenge 
 
-Bem-vindo ao meu repositorio feito por um desafio proposto pela Mundiware
+<h2>Applications resources</h2>
+- Main function: Minify XML<br>
+- Layout: A landing page
 
 
-
-<h2>Recursos aplicação</h2>
-- Função principal: Minificar Xml
-- Layout: Uma unica page, cor branca.
-
-<h3>Recursos tecnicos</h3>
+<h3>Funcional resources</h3>
 - Upload de Arquivo Xml pode ser feito diretamente
 - Download de xml modificado no site
 
-<h2>Como funciona?</h2>
+<h2>How does it works?</h2>
 
 
-1. Insira um xml
-  - Pode ser por arquivo .xml ou inserir o conteudo no input
-3. O conteudo interno do node será mostrado no forms e voce poderá alterar o mesmo por lá.
-4. O xml que for alterado será mostrado no area text inferior direito
-  - Abaixo do área text tem as opções de visualizar o arquivo minficado e fazer o download do mesmo
+1. Upload a xml
+  - You can upload a file or put a xml text in the area box.
+3. The intern content will be displayed on the fdorm and you can change it there.
+4. The xml who suffer alterations will be displayed at the text area bellow
+  - Below of the text area there are options of visualization as: see the minify file or download it minified
 
 ### Desktop Preview
 
@@ -28,7 +26,7 @@ Bem-vindo ao meu repositorio feito por um desafio proposto pela Mundiware
 
 
 
-### Foi utilizado no projeto
+### Languages and Frameworks
 
 - C#
 
